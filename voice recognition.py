@@ -11,41 +11,54 @@ tts_engine = pyttsx3.init()
 def speech_to_text():
     with sr.Microphone() as source:
         try:
-            scroll_text.insert(ctk.END, 'Now Listening  \n')
+            scroll_text.insert(ctk.END, 'Now Listening...\n')
             recognizer.adjust_for_ambient_noise(source)
             audio = recognizer.listen(source)
             text = recognizer.recognize_google(audio)
-            scroll_text.insert(ctk.END, 'spoken: ' + text + '\n'+ '\n')
+            scroll_text.insert(ctk.END, 'Spoken: ' + text + '\n\n')
         except sr.UnknownValueError:
-            scroll_text.insert(ctk.END, "Sorry, I did not understand that.\n"+ '\n')
+            scroll_text.insert(ctk.END, "Sorry, I did not understand that.\n\n")
         except sr.RequestError:
-            scroll_text.insert(ctk.END, "Sorry, my speech service is down.\n"+ '\n')
+            scroll_text.insert(ctk.END, "Sorry, my speech service is down.\n\n")
 
 # Function to convert text to speech
 def text_to_speech():
     text = entry_text.get()
     tts_engine.say(text)
     tts_engine.runAndWait()
-    scroll_text.insert(ctk.END, 'written: ' + text + "\n"+ '\n')
+    scroll_text.insert(ctk.END, 'Written: ' + text + "\n\n")
 
 # Create the main window
 app = CTk()
-app.geometry("500x500")
+app.geometry("600x600")
+app.title("Speech to Text and Text to Speech")
 
 # Create the scrolled text widget
-scroll_text = CTkTextbox(master=app)
-scroll_text.pack(pady=20, padx=20, fill='both', expand=True)
+scroll_text = CTkTextbox(master=app, width=580, height=300)
+scroll_text.grid(row=0, column=0, columnspan=3, padx=10, pady=10, sticky="nsew")
 
 # Create the text entry widget
-entry_text = CTkEntry(master=app, placeholder_text= 'Enter text...')
-entry_text.pack(pady=10, padx=20,side='right', fill='x')
+entry_text = CTkEntry(master=app, placeholder_text='Enter text...')
+entry_text.grid(row=2, column=2, padx=10, pady=10, sticky="ew")
 
 # Create the buttons
 btn_speech_to_text = CTkButton(master=app, text="Speech to Text", command=speech_to_text)
-btn_speech_to_text.pack(pady=10, padx=20,side='left', fill='x')
+btn_speech_to_text.grid(row=1, column=0, padx=10, pady=10, sticky="w")
 
 btn_text_to_speech = CTkButton(master=app, text="Text to Speech", command=text_to_speech)
-btn_text_to_speech.pack(pady=10)
+btn_text_to_speech.grid(row=1, column=2, padx=10, pady=10, sticky="e")
+
+# Create the toggle switch
+tgl_translate = ctk.CTkSwitch(master=app, text="Toggle Option")
+tgl_translate.grid(row=4, column=0, padx=10, pady=10, sticky="w")
+
+drp_translate = ctk.CTkOptionMenu(master=app)
+drp_translate.grid(row=2, column=0, padx=10, pady=10, sticky="we")
+# Configure the grid to adjust properly on resizing
+app.grid_rowconfigure(0, weight=1)
+app.grid_columnconfigure(0, weight=1)
+app.grid_columnconfigure(1, weight=1)
+app.grid_columnconfigure(2, weight=1)
 
 # Run the GUI loop
 app.mainloop()
