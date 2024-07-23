@@ -13,23 +13,34 @@ class LoginApp(CTk):
     def __init__(self):
         super().__init__()
         self.title("Login")
-        self.geometry("300x200")
+        self.geometry("600x600")
 
         self.create_login_widgets()
 
     def create_login_widgets(self):
+        # Configure grid to center the widgets
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=1)
+        self.grid_rowconfigure(3, weight=1)
+        self.grid_rowconfigure(4, weight=1)
+        self.grid_rowconfigure(5, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(2, weight=1)
+
         self.username_label = ctk.CTkLabel(self, text="Username")
-        self.username_label.grid(row=0, column=0, padx=10, pady=10)
+        self.username_label.grid(row=2, column=1, padx=10, pady=10, sticky="e")
         self.username_entry = ctk.CTkEntry(self)
-        self.username_entry.grid(row=0, column=1, padx=10, pady=10)
+        self.username_entry.grid(row=2, column=2, padx=10, pady=10, sticky="w")
 
         self.password_label = ctk.CTkLabel(self, text="Password")
-        self.password_label.grid(row=1, column=0, padx=10, pady=10)
+        self.password_label.grid(row=3, column=1, padx=10, pady=10, sticky="e")
         self.password_entry = ctk.CTkEntry(self, show="*")
-        self.password_entry.grid(row=1, column=1, padx=10, pady=10)
+        self.password_entry.grid(row=3, column=2, padx=10, pady=10, sticky="w")
 
         self.login_button = ctk.CTkButton(self, text="Login", command=self.login)
-        self.login_button.grid(row=2, column=1, padx=10, pady=10)
+        self.login_button.grid(row=4, column=2, padx=10, pady=10, sticky="")
 
     def login(self):
         username = self.username_entry.get()
@@ -38,26 +49,39 @@ class LoginApp(CTk):
         # Replace the following lines with your actual username and password validation
         if username == "admin" and password == "password":
             messagebox.showinfo("Login Successful", "Welcome!")
-            self.main_app()
+            self.fade_to_main_app()
         else:
             messagebox.showerror("Login Failed", "Invalid username or password")
 
-    def main_app(self):
-        self.destroy()
-        main_window = MainApp()
-        main_window.mainloop()
+    def fade_to_main_app(self):
+        self.fade_out(self.create_main_app_widgets)
 
-class MainApp(CTk):
-    def __init__(self):
-        super().__init__()
+    def fade_out(self, callback, step=0.05):
+        alpha = self.attributes('-alpha')
+        if alpha > 0:
+            alpha -= step
+            self.attributes('-alpha', alpha)
+            self.after(50, lambda: self.fade_out(callback, step))
+        else:
+            callback()
+            self.fade_in()
+
+    def fade_in(self, step=0.05):
+        alpha = self.attributes('-alpha')
+        if alpha < 1:
+            alpha += step
+            self.attributes('-alpha', alpha)
+            self.after(50, lambda: self.fade_in(step))
+
+    def create_main_app_widgets(self):
+        for widget in self.winfo_children():
+            widget.destroy()
+
         self.geometry("600x600")
         self.title("Speech to Text and Text to Speech")
 
         self.translate_var = tk.IntVar(value=0)
 
-        self.create_main_widgets()
-
-    def create_main_widgets(self):
         # Create the scrolled text widget
         self.scroll_text = CTkTextbox(master=self, width=580, height=300)
         self.scroll_text.grid(row=0, column=0, columnspan=3, padx=10, pady=10, sticky="nsew")
