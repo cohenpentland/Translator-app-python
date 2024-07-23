@@ -4,6 +4,9 @@ import speech_recognition as sr
 import pyttsx3
 import tkinter as tk
 from tkinter import messagebox
+import openai
+
+openai.api_key = ''
 
 # Initialize recognizer and text-to-speech engine
 recognizer = sr.Recognizer()
@@ -105,11 +108,13 @@ class LoginApp(CTk):
         self.drp_translate = CTkOptionMenu(master=self, values=['english', 'japanese'])
         self.drp_translate.grid(row=2, column=0, padx=10, pady=10, sticky="we")
 
+        language = self.drp_translate.get()  # Get the selected language
         # Configure the grid to adjust properly on resizing
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
         self.grid_columnconfigure(2, weight=1)
+        
 
     def speech_to_text(self):
         with sr.Microphone() as source:
@@ -125,13 +130,76 @@ class LoginApp(CTk):
                 except sr.RequestError:
                     self.scroll_text.insert(ctk.END, "Sorry, my speech service is down.\n\n")
             else:
-                self.scroll_text.insert(ctk.END, 'hello: ')
+                try:
+                    language = self.drp_translate.get()  # Get the selected language
+                    
+                    self.scroll_text.insert(ctk.END, 'Now Listening...\n')
+                    recognizer.adjust_for_ambient_noise(source)
+                    audio = recognizer.listen(source)
+                    text = recognizer.recognize_google(audio)
+                    
+                    prompt = f"Translate this text to {language}: {text}"
+                    response = openai.ChatCompletion.create(
+                        model="gpt-3.5-turbo",
+                        messages=[
+                            {"role": "system", "content": "You are a helpful assistant."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        max_tokens=150
+                    )
+    
+                    translated_text = response.choices[0].message['content'].strip()
+                    self.scroll_text.insert(ctk.END, 'Translated: ' + translated_text + '\n\n')
+    
+                except sr.UnknownValueError:
+                    self.scroll_text.insert(ctk.END, "Sorry, I did not understand that.\n\n")
+                except sr.RequestError:
+                    self.scroll_text.insert(ctk.END, "Sorry, my speech service is down.\n\n")
+    
+    def text_to_speech(self):   
+        if self.translate_var.get() == 0:   
+            try:    
+                text = self.entry_text.get()
+                tts_engine.say(text)
+                tts_engine.runAndWait()
+                self.scroll_text.insert(ctk.END, 'Written: ' + text + "\n\n")
+            except sr.UnknownValueError:
+                    self.scroll_text.insert(ctk.END, "Sorry, I did not understand that.\n\n")
+            except sr.RequestError:
+                    self.scroll_text.insert(ctk.END, "Sorry, my speech service is down.\n\n")       
+    
+                
+        
+        else:
+            try:
+                language = self.drp_translate.get()  # Get the selected language
+                
+                text = self.entry_text.get()
+                prompt = f"Translate this text to {language}: {text}"
+                response = openai.ChatCompletion.create(
+                        model="gpt-3.5-turbo",
+                        messages=[
+                            {"role": "system", "content": "you only provide the translation no additinal text"},
+                            {"role": "user", "content": prompt}
+                        ],
+                        max_tokens=150
+                    )
+                translated_text = response.choices[0].message['content'].strip()
 
-    def text_to_speech(self):
-        text = self.entry_text.get()
-        tts_engine.say(text)
-        tts_engine.runAndWait()
-        self.scroll_text.insert(ctk.END, 'Written: ' + text + "\n\n")
+                self.scroll_text.insert(ctk.END, 'Translated: ' + translated_text + '\n\n')
+
+                tts_engine.say(translated_text)
+
+                tts_engine.runAndWait()
+
+            except sr.UnknownValueError:
+                    self.scroll_text.insert(ctk.END, "Sorry, I did not understand that.\n\n")
+            except sr.RequestError:
+                    self.scroll_text.insert(ctk.END, "Sorry, my speech service is down.\n\n")
+            
+            
+                
+
 
 if __name__ == "__main__":
     login_app = LoginApp()
