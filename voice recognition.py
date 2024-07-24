@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from customtkinter import CTk, CTkEntry, CTkButton, CTkTextbox, CTkSwitch, CTkOptionMenu
+from customtkinter import CTk, CTkEntry, CTkButton, CTkTextbox, CTkSwitch, CTkOptionMenu, CTkLabel, CTkSlider
 import speech_recognition as sr
 import pyttsx3
 import tkinter as tk
@@ -109,6 +109,11 @@ class LoginApp(CTk):
         self.drp_translate.grid(row=2, column=0, padx=10, pady=10, sticky="we")
 
         language = self.drp_translate.get()  # Get the selected language
+
+        # Create the options button
+        self.options_button = CTkButton(master=self, text="Options", command=self.open_options_menu)
+        self.options_button.grid(row=4, column=2, padx=10, pady=10, sticky="e")
+
         # Configure the grid to adjust properly on resizing
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
@@ -196,10 +201,22 @@ class LoginApp(CTk):
                     self.scroll_text.insert(ctk.END, "Sorry, I did not understand that.\n\n")
             except sr.RequestError:
                     self.scroll_text.insert(ctk.END, "Sorry, my speech service is down.\n\n")
-            
-            
-                
 
+    def open_options_menu(self):
+        options_window = tk.Toplevel(self)
+        options_window.title("Options")
+        options_window.geometry("300x200")
+
+        volume_label = CTkLabel(options_window, text="Volume")
+        volume_label.pack(pady=10)
+
+        self.volume_slider = CTkSlider(options_window, from_=0, to=100, command=self.set_volume)
+        self.volume_slider.set(tts_engine.getProperty('volume') * 100)
+        self.volume_slider.pack(pady=10)
+
+    def set_volume(self, value):
+        volume = float(value) / 100
+        tts_engine.setProperty('volume', volume)
 
 if __name__ == "__main__":
     login_app = LoginApp()
