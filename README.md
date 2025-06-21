@@ -1,5 +1,14 @@
 🗣️ Voice Assistant App (with Login, Speech-to-Text, and Translation)
 
+
+
+
+![project-1](https://github.com/user-attachments/assets/e260a231-1dab-4f48-b288-3823abe5d40f)
+
+
+
+
+
 This Python desktop application, built with customtkinter, combines speech recognition, text-to-speech, and translation functionalities in a user-friendly graphical interface. It includes a basic login screen and leverages OpenAI's GPT API for real-time language translation.
 📦 Features
 
